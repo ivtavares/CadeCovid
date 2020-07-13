@@ -1,0 +1,7 @@
+{
+  "url": "https://censo2010.ibge.gov.br/sinopse/index.php?dados=10&uf=00",
+  "file_destination": "../data_source/states_density.csv",
+  "column_names": ["LOCALIDADE", "1872", "1890", "1900", "1920", "1940", "1950", "1960", "1970", "1980", "1991", "2000",
+    "2010"],
+  "igbe_code_file": "../data_source/codigo_ibge_estados_regioes.csv"
+}
