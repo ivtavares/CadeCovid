@@ -47,6 +47,3 @@ def state_status(ibge_code):
                        .reset_index().pipe(convert_to_dict))
 
     return last_cases_dict[ibge_code]
-
-
-state_status(22)
