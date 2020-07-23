@@ -1,5 +1,9 @@
 import pandas as pd
-from pyhocon import ConfigFactory
+import os
+
+csv_file = "../data_source/brasil_io_caso_full.csv"
+mm_window = 14
+trend_window = 15
 
 
 def load_cases(file):
@@ -7,7 +11,8 @@ def load_cases(file):
     df['date'] = pd.to_datetime(df.date)
     df['city_ibge_code'] = pd.to_numeric(df.city_ibge_code, downcast='unsigned')
 
-    return df[['city_ibge_code', 'state', 'place_type', 'date', 'last_available_confirmed', 'new_confirmed']].sort_values('date')
+    return df[['city_ibge_code', 'state', 'place_type', 'date', 'last_available_confirmed', 'new_confirmed']] \
+        .sort_values('date')
 
 
 def remove_cities(df):
@@ -33,17 +38,17 @@ def add_new_trend_is_decreasing(df, window):
 def convert_to_dict(df):
     last_cases = df.groupby(['state_ibge_code', 'state']).last()
 
-    return last_cases[['date', 'is_decreasing']].reset_index().set_index('state_ibge_code').to_dict('index')
+    return last_cases[['date', 'is_decreasing']].reset_index().set_index('state').to_dict('index')
 
 
-def state_status(ibge_code):
-    config = ConfigFactory.parse_file('config/state_status.conf')
-    cases_csv = config.cases_csv
-    mm_window = config.mm_window
-    trend_window = config.trend_window
+def state_status(ibge_code, file=csv_file, mm_window=mm_window, trend_window=trend_window):
+    path = os.path.dirname(__file__)
+    os.chdir(path)
 
-    last_cases_dict = (load_cases(cases_csv).pipe(remove_cities).pipe(add_new_confirmed_mm, mm_window)
+    last_cases_dict = (load_cases(file).pipe(remove_cities).pipe(add_new_confirmed_mm, mm_window)
                        .pipe(add_new_trend_is_decreasing, trend_window)
                        .reset_index().pipe(convert_to_dict))
-
-    return last_cases_dict[ibge_code]
+    try:
+        return last_cases_dict[ibge_code]
+    except:
+        return None
