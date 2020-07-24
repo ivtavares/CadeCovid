@@ -1,10 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#source: https://medium.com/@kshitijvijay271199/flask-on-google-colab-f6525986797b
-!pip install flask-ngrok
-!pip install -U flask-cors
-#https://www.kdnuggets.com/2019/01/build-api-machine-learning-model-using-flask.html
-
 import requests
 import pandas as pd
 
@@ -59,14 +54,12 @@ df_covid['state'] = df_covid['state'].map(state)
 import numpy as np
 import json
 
-from flask_ngrok import run_with_ngrok
 from flask import Flask, request, render_template, redirect, url_for, flash, jsonify
 from flask_cors import CORS, cross_origin
 
 from sklearn.externals import joblib
 
 app = Flask(__name__, static_url_path = "/assets", static_folder = "assets")
-run_with_ngrok(app) 
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
