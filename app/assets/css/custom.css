@@ -941,7 +941,7 @@ footer {
 }
 .widget-text{
 	color: #5f6368;
-	font-size: 0.65rem;
+	font-size: 0.7rem;
 }
 .widget-div{
     display: block;
@@ -950,7 +950,7 @@ footer {
 }
 .widget-numbers {
     font-weight: 500;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     line-height: 1;
     margin: 1rem auto;
 }
