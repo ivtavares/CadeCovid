@@ -47,28 +47,50 @@
 				type:'GET',
 				url: URL + '/api/v1/',
 				dataType:'json',
-				data: {'uf':uf}, // JSON.stringify({'uf':uf}), //$('#form-pesquisa').serialize(),
+				data: {'uf':uf},
 				contentType: "application/json; charset=utf-8",
 				success: function(data) {
-					res = data['last']
+					
 					console.log(data);
+					
+					last = data['cases']['last'];
+					details = data['cases']['detail'];
+					is_decreasing = data['is_decreasing'];
+					mobility = data['mobility'];
+					
 					loading.css("display","none");
 					result.css("display", "block");
-					$("#flag-uf").attr('src','./assets/img/flags/'+res['uf']+'.png')
-					$("#local").text(res['state']);
-					$("#data").text(res['date']);
-					$("#populacao").text(res['estimated_population_2019']);
-					$("#confirmados").text(res['confirmed']);
-					$("#mortes").text(res['deaths']);
-					$("#indice").text(parseFloat(res['death_rate']*100).toFixed(2));
+					
+					$("#flag-uf").attr('src','./assets/img/flags/'+last['uf']+'.png')
+					$("#local").text(last['state']);
+					$("#data").text(last['date']);
+					$("#populacao").text(parseInt(last['estimated_population_2019']).toLocaleString());
+										
+					if(is_decreasing){
+						$(".tendencia").removeClass("bg-danger" ).addClass( "bg-success" );
+						$("#text-tendencia").removeClass("fa-chart-line").addClass("fa-chart-line-down");
+						$("#tendencia").text('REDUZIR');
+					}else{
+						$(".tendencia").removeClass("bg-success" ).addClass( "bg-danger" );
+						$("#text-tendencia").removeClass("fa-chart-line-down").addClass("fa-chart-line");
+						$("#tendencia").text('AUMENTAR');
+					}					
+					
+					$("#confirmados").text(parseInt(last['confirmed']).toLocaleString());
+					$("#mortes").text(parseInt(last['deaths']).toLocaleString());
+					$("#indice").text(parseFloat(last['death_rate']*100).toFixed(2));
+					
+					$("#mobilidade-avg").text(mobility['avg']);
+					$("#mobilidade-max").text(mobility['max']);
+					$("#mobilidade-min").text(mobility['min']);
 					
 					var detail = new Array();
 					
-					for (var i=0; i < data['detail'].length ;i++) {
-						var dt = data['detail'][i].date.split("-")
+					for (var i=0; i < details.length ;i++) {
+						var dt = details[i].date.split("-")
 						console.log(dt);
   
-						detail[i] = [new Date(dt[0], dt[1], dt[2]),data['detail'][i].confirmed,data['detail'][i].deaths];
+						detail[i] = [new Date(dt[0], dt[1], dt[2]),details[i].confirmed,details[i].deaths];
 					}
 					console.log(detail);
 					drawCurveTypes(detail);
@@ -148,7 +170,7 @@
 		<br>
 		<div class="result-container">
 			<div class="row">
-				<div class="col-lg-4">
+				<div class="col-lg-6">
 					<div class="card">
 						<div class="card-body inform">
 							<div class="widget-text"> Localidade </div>
@@ -156,13 +178,28 @@
 								<div class="widget-image"><img id="flag-uf" src="./assets/img/flags/MG.png" width="45" height="32" /></div>
 							    <div class="widget-title"><span id="local">Minas Gerais</span></div>
 							</div>
-							<div style="display: flex; margin: 5px 0;">
+							<div style="display: flex; margin: 10px 0;">
 								<div class="widget-text">
-									População: <span id="populacao">123545413</span>
-									| 
-									Data: <span id="data">16/05/2020</span>
+									População: <b><span class="widget-numbers" id="populacao">21000000</span></b>
 								</div>
 							</div>
+							<div style="margin: 10px 0;">
+								<div class="widget-text">
+									<i class="fas fa-calendar-day"></i> Data apuração dados: 
+									<b><span id="data">16/05/2020</span></b>
+								</div>
+							</div>	
+							<div style="margin: 5px 0;">
+								<div class="widget-text">
+									Tendência para os próximos dias:
+								</div>
+								<div class="card tendencia text-white">
+									<div class="card-body" style="text-align: center;">
+										<span style="font-size: 1rem; margin:5px"><i id="text-tendencia" class="fas"></i></span>
+										<span class="widget-numbers" id="tendencia">-</span>
+									</div>
+								</div>
+							</div>				
 						</div>
 					</div>
 				</div>
@@ -174,27 +211,36 @@
 								<span class="widget-icon"><i class="fas fa-user"></i></span>
 								<span class="widget-numbers" id="confirmados">21.211.564</span>
 							</div>
+							<div class="widget-text">Mortes</div>
+							<div class="widget-div">
+								<span class="widget-icon"><i class="fas fa-skull"></i></span>
+								<span class="widget-numbers" id="mortes">124.541</span>
+							</div>
+							<div class="widget-text">Mortalidade</div>
+							<div class="widget-div">
+								<span class="widget-icon"><i class="fas fa-percent"></i></span>
+								<span class="widget-numbers" id="indice">1,03</span>
+							</div>
 						</div>
 					</div>
 				</div>
 				<div class="col-lg-3">
 					<div class="card">
 						<div class="card-body inform">
-							<div class="widget-text">Mortes</div>
+							<div class="widget-text">Mobilidade Atual (média)</div>
 							<div class="widget-div">
-								<span class="widget-icon"><i class="fas fa-skull"></i></span>
-								<span class="widget-numbers" id="mortes">124.541</span>
+								<span class="widget-icon"><i class="fas fa-walking"></i></span>
+								<span class="widget-numbers" id="mobilidade-avg">20</span>%
 							</div>
-						</div>
-					</div>
-				</div>
-				<div class="col-lg-2">
-					<div class="card">
-						<div class="card-body inform">
-							<div class="widget-text">Mortalidade</div>
+							<div class="widget-text">Máxima</div>
 							<div class="widget-div">
-								<span class="widget-icon"><i class="fas fa-percent"></i></span>
-								<span class="widget-numbers" id="indice">1,03</span>
+								<span class="widget-icon"><i class="fas fa-arrow-up"></i></span>
+								<span class="widget-numbers" id="mobilidade-max">8.0</span>%
+							</div>
+							<div class="widget-text">Mínima</div>
+							<div class="widget-div">
+								<span class="widget-icon"><i class="fas fa-arrow-down"></i></span>
+								<span class="widget-numbers" id="mobilidade-min">1.0</span>%
 							</div>
 						</div>
 					</div>
